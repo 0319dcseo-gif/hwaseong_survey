@@ -3,22 +3,33 @@
  *
  * [최초 설정 방법]
  * 1. 구글 시트에서 Apps Script(google-apps-script/Code.gs)를 웹 앱으로 배포합니다.
- * 2. 발급된 웹 앱 URL(https://script.google.com/macros/s/.../exec)을 아래 SHEET_URL에 붙여넣으세요.
- * 3. 이 파일 하나만 수정하면 개인택시 양수교육 / 일반·버스·화물 교육 설문 모두에 자동 반영됩니다.
+ * 2. 발급된 웹 앱 URL을 아래 SHEET_URL 에 붙여넣습니다.
+ * 3. 구글 스프레드시트 브라우저 주소창의 URL을 SPREADSHEET_URL 에 붙여넣으면
+ *    관리자 도구(자물쇠 메뉴)에서 버튼 한 번으로 시트를 바로 열 수 있습니다.
+ * 4. ADMIN_PASSWORD 를 화성센터 담당자 전용 비밀번호로 변경해 사용하세요.
  */
 window.SURVEY_CONFIG = {
-  // ▼ 구글 Apps Script 웹 앱 배포 후 발급된 URL을 따옴표 안에 넣어주세요.
-  SHEET_URL: 'https://script.google.com/macros/s/AKfycbzXqMjDVvmzxCdRKc9pmQVzSJDWfHQtMEsTssC8UCD5aHzoclM1WfxGdz0cM5iK_Pit/exec',
+  // ▼ 1. 구글 Apps Script 웹 앱 URL (https://script.google.com/macros/s/.../exec)
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycbwYr02-sFuP0v8OpG7YGMwEIBbeW4R5nr9zg4PhlfX0-B2xPGTrM_8C0JTxHyxkSr1S/exec',
+
+  // ▼ 2. 연동된 구글 스프레드시트 URL (https://docs.google.com/spreadsheets/d/.../edit)
+  SPREADSHEET_URL: 'https://docs.google.com/spreadsheets/d/14e7BuD-ghlcUCaKago44gNaCzBhph43Wq0U9BHvJk-M/edit?gid=1659103135#gid=1659103135',
+
+  // ▼ 3. 센터 담당자 도구(자물쇠 아이콘) 접속 비밀번호 (원하는 비밀번호로 변경하세요)
+  ADMIN_PASSWORD: '1234',
 
   // 센터명
   CENTER_NAME: '화성교통안전체험교육센터',
 
-  // 일반·버스·화물 설문에서 선택할 수 있는 교육과정 목록 (필요 시 자유롭게 추가/수정)
+  // 일반과정 설문 드롭다운 교육과정 목록 (요청 순서 반영)
   COURSES: [
+    '일반기본교육(전기차)',
+    '법정교육(버스)',
+    '법정교육(택시)',
+    '법정교육(화물)',
     '버스기본교육',
     '버스심화교육',
     '버스자격교육',
-    '신규버스운전자 양성교육',
     '일반기본교육',
     '일반심화교육',
     '화물기본교육',

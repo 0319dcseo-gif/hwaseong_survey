@@ -14,6 +14,21 @@
     '교통안전체험교육센터의 교육 서비스는 전반적으로 만족스럽다.'
   ];
 
+  var DEFAULT_COURSES = [
+    '일반기본교육(전기차)',
+    '법정교육(버스)',
+    '법정교육(택시)',
+    '법정교육(화물)',
+    '버스기본교육',
+    '버스심화교육',
+    '버스자격교육',
+    '일반기본교육',
+    '일반심화교육',
+    '화물기본교육',
+    '화물자격교육',
+    '기타(직접입력)'
+  ];
+
   function isConfigured(url) {
     return (
       typeof url === 'string' &&
@@ -50,7 +65,8 @@
   }
 
   window.initHwaseongSurvey = function (options) {
-    var surveyType = options.surveyType; // 'taxi' | 'general'
+    // surveyType: 'taxi' | 'bus' | 'general'
+    var surveyType = options.surveyType;
     var config = window.SURVEY_CONFIG || {};
     var sheetUrl = config.SHEET_URL || '';
     var ratings = {};
@@ -60,13 +76,11 @@
     var currentStep = 0;
     var activeSubmissionId = null;
 
-    // 센터명 반영
     var centerEl = document.getElementById('centerName');
     if (centerEl && config.CENTER_NAME) {
       centerEl.textContent = config.CENTER_NAME;
     }
 
-    // 구글 시트 미연동 시 관리자 안내 배너
     var demoBanner = document.getElementById('demoBanner');
     if (demoBanner && !isConfigured(sheetUrl)) {
       demoBanner.classList.add('show');
@@ -86,17 +100,7 @@
       var courses =
         Array.isArray(config.COURSES) && config.COURSES.length > 0
           ? config.COURSES
-          : [
-              '버스기본교육',
-              '버스심화교육',
-              '버스자격교육',
-              '신규버스운전자 양성교육',
-              '일반기본교육',
-              '일반심화교육',
-              '화물기본교육',
-              '화물자격교육',
-              '기타(직접입력)'
-            ];
+          : DEFAULT_COURSES;
 
       courses.forEach(function (c) {
         var opt = document.createElement('option');
@@ -387,7 +391,6 @@
       updateProgress();
     }
 
-    // 다음 / 이전 버튼 이벤트
     document.querySelectorAll('[data-action="next"]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         if (validateStep(currentStep)) {
@@ -402,7 +405,6 @@
       });
     });
 
-    // 상단 스텝 탭 클릭 (이전 단계로는 자유롭게, 다음 단계는 현재 검증 통과 시)
     stepPills.forEach(function (pill, idx) {
       pill.addEventListener('click', function () {
         if (idx <= currentStep) {
@@ -413,7 +415,6 @@
       });
     });
 
-    // 상단 진행률 바 계산
     function updateProgress() {
       var fill = document.getElementById('progressFill');
       if (!fill) return;
@@ -427,7 +428,7 @@
         if (cVal && (cVal !== '기타(직접입력)' || (courseEtcText && courseEtcText.value.trim()))) {
           done++;
         }
-      } else {
+      } else if (surveyType === 'taxi') {
         total++;
         if (document.querySelector('input[name="transfer"]:checked')) done++;
       }
@@ -483,7 +484,6 @@
       statusBox.className = 'status-box';
       statusBox.style.display = 'none';
 
-      // 모든 단계 최종 검증
       for (var s = 0; s < panels.length; s++) {
         if (!validateStep(s)) {
           showStep(s);
@@ -494,8 +494,10 @@
         }
       }
 
-      var resolvedCourse = '개인택시 양수교육';
-      if (surveyType === 'general') {
+      var resolvedCourse = '개인택시양수';
+      if (surveyType === 'bus') {
+        resolvedCourse = '버스양성과정';
+      } else if (surveyType === 'general') {
         resolvedCourse =
           courseSelect.value === '기타(직접입력)'
             ? courseEtcText.value.trim()
@@ -569,7 +571,6 @@
       statusBox.style.display = 'block';
       statusBox.textContent = '⏳ 응답을 안전하게 저장하고 있습니다...';
 
-      // 1차 시도: CORS 확인 가능한 text/plain POST (Google Apps Script 302 리다이렉트 응답 검증)
       fetch(sheetUrl, {
         method: 'POST',
         redirect: 'follow',
@@ -593,7 +594,6 @@
           }
         })
         .catch(function () {
-          // 오프라인 상태이면 즉시 재시도 안내
           if (!navigator.onLine) {
             btn.disabled = false;
             btn.textContent = '다시 제출하기';
@@ -602,7 +602,6 @@
               '❌ 인터넷 연결이 끊겨 있습니다. 데이터/와이파이를 확인한 뒤 다시 눌러주세요.';
             return;
           }
-          // 일부 인앱 브라우저에서 리다이렉트 CORS 차단 시 no-cors POST 폴백 (submissionId로 중복 저장 자동 방지)
           fetch(sheetUrl, {
             method: 'POST',
             mode: 'no-cors',
